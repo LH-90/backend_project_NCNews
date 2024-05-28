@@ -33,7 +33,9 @@ describe("GET /api/topics", () => {
             })
           })
     })
+})
 
+describe("GET /api/stories", () => {    
     test("Status 404: responds with an error message for a route that doesn't exist", () => {
         return request(app)
           .get("/api/stories")
