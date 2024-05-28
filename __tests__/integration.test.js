@@ -3,6 +3,8 @@ const app = require("../app")
 const db = require("../db/connection")
 const seed = require("../db/seeds/seed")
 const data = require("../db/data/test-data/index")
+const fs = require("fs/promises")
+const endpoints = require("../endpoints.json")
 
 
 beforeEach(()=>{
@@ -40,7 +42,17 @@ describe("GET /api/topics", () => {
             expect(body.msg).toBe("Route Non Found")
             })
     })
-
-
-
 })
+
+describe("GET /api", () => {
+    
+    test("Status 200: responds with an object describing all the available endpoints on the API", () => {
+            return request(app)
+            .get("/api")
+            .expect(200)
+            .then(({ body }) => {
+                expect(body).toEqual(endpoints)
+            })
+    })    
+})
+
