@@ -1,5 +1,5 @@
-const {selectTopics} = require("../models/models")
-const fs = require("fs")
+const {selectTopics, selectArticleById} = require("../models/models")
+const fs = require("fs/promises")
 
 
 
@@ -11,11 +11,18 @@ exports.getTopics = (req, res) => {
 }
 
 exports.getEndpoints = (req, res) => {
-    fs.readFile(__dirname + "/../endpoints.json", "utf-8", (err, data) => {
-        if (err) {
-            console.log(err)
-        } else {
-            res.status(200).send(JSON.parse(data))
-        }
-    })
+    fs.readFile(__dirname + "/../endpoints.json", "utf-8")
+        .then((result) => {
+            res.status(200).send(JSON.parse(result))
+        })
+}
+
+exports.getArticleById = (req, res, next) => {
+    const { article_id } = req.params
+    return selectArticleById(article_id)
+      .then((article) => {
+        res.status(200).send({ article })
+      })
+      .catch(next)
+
 }
