@@ -4,7 +4,7 @@ const db = require("../db/connection")
 const seed = require("../db/seeds/seed")
 const data = require("../db/data/test-data/index")
 const endpoints = require("../endpoints.json")
-const { convertTimestampToDate } = require("../db/seeds/utils")
+
 
 
 beforeEach(()=>{
@@ -191,4 +191,60 @@ describe("GET /api/articles/:article_id/comments", () => {
 
 })
 
+// GET /api/articles/:article_id/comments
+describe.only("POST /api/articles/:article_id/comments", () => {
+    
+  test("Status 201: responds with the posted comment", () => {
+      const newComment = {
+        username: "icellusedkars",
+        body: "No, wrong reasoning"
+      }
+      return request(app)
+        .post("/api/articles/11/comments")
+        .send(newComment)
+        .expect(201)
+        .then(({ body }) => {
+            const comment = body.comment
+                expect(comment).toMatchObject({
+                  comment_id: 19,
+                  body: 'No, wrong reasoning',
+                  article_id: 11,
+                  author: 'icellusedkars',
+                  votes: 0,
+                  created_at: expect.any(String)
+                })
+    
+  })
 
+})
+
+  test("Status 400: responds with an error message when missing a required field", () => {
+    const newComment = {
+      username: "icellusedkars",
+    }
+    return request(app)
+      .post("/api/articles/11/comments")
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+         expect(body.msg).toBe("Bad Request")
+      })
+
+  })
+
+  test("Status 400: responds with an error message when passed a non-existant username", () => {
+    const newComment = {
+      username: "Léa",
+      body: "No, wrong reasoning"
+    }
+    return request(app)
+      .post("/api/articles/11/comments")
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+         expect(body.msg).toBe("Bad Request")
+      })
+
+  })
+  
+})
