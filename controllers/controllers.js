@@ -1,4 +1,4 @@
-const {selectTopics, selectArticleById, selectArticles} = require("../models/models")
+const {selectTopics, selectArticleById, selectArticles, selectCommentsByArticle} = require("../models/models")
 const fs = require("fs/promises")
 
 
@@ -27,11 +27,21 @@ exports.getArticleById = (req, res, next) => {
 
 }
 
-exports.getArticles = (req, res, next) => {
-    const date = req.query.sort_by 
-    return selectArticles(date)
+exports.getArticles = (req, res) => {
+    return selectArticles()
       .then((articles) => {
         res.status(200).send({ articles })
       }) 
-      .catch(next)
+}
+
+exports.getCommentsByArticle = (req, res, next) => {
+    const article_id = req.params.article_id
+    selectArticleById(article_id)
+    .then(() => {
+      return selectCommentsByArticle(article_id)
+    })
+    .then((comments) => {
+        res.status(200).send({ comments })
+    }) 
+    .catch(next)
 }
