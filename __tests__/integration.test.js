@@ -191,8 +191,8 @@ describe("GET /api/articles/:article_id/comments", () => {
 
 })
 
-// GET /api/articles/:article_id/comments
-describe.only("POST /api/articles/:article_id/comments", () => {
+// POST /api/articles/:article_id/comments
+describe("POST /api/articles/:article_id/comments", () => {
     
   test("Status 201: responds with the posted comment", () => {
       const newComment = {
@@ -240,6 +240,63 @@ describe.only("POST /api/articles/:article_id/comments", () => {
     return request(app)
       .post("/api/articles/11/comments")
       .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+         expect(body.msg).toBe("Bad Request")
+      })
+
+  })
+  
+})
+
+
+// PATCH /api/articles/:article_id
+describe("PATCH /api/articles/:article_id", () => {
+    
+  test("Status 200: responds with the updated comment", () => {
+      const updatedArticle = {
+        inc_votes: 4
+      }
+      return request(app)
+        .patch("/api/articles/1")
+        .send(updatedArticle)
+        .expect(200)
+        .then(({ body }) => {
+            const article = body.article
+                expect(article).toMatchObject({
+                  title: "Living in the shadow of a great man",
+                  topic: "mitch",
+                  author: "butter_bridge",
+                  body: "I find this existence challenging",
+                  created_at: "2020-07-09T20:11:00.000Z",
+                  votes: 104,
+                  article_img_url:
+                    "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+                })
+    
+  })
+
+})
+
+  test("Status 400: responds with an error message when missing a required field", () => {
+    const updatedArticle = {}
+    return request(app)
+      .patch("/api/articles/1")
+      .send(updatedArticle)
+      .expect(400)
+      .then(({ body }) => {
+         expect(body.msg).toBe("Bad Request")
+      })
+
+  })
+
+  test("Status 400: responds with an error message when passed an incorrect type", () => {
+    const updatedArticle = {
+      inc_votes: "chocolate"
+    }
+    return request(app)
+      .patch("/api/articles/1")
+      .send(updatedArticle)
       .expect(400)
       .then(({ body }) => {
          expect(body.msg).toBe("Bad Request")

@@ -1,5 +1,5 @@
 const { log } = require("console")
-const {selectTopics, selectArticleById, selectArticles, selectCommentsByArticle, insertComment} = require("../models/models")
+const {selectTopics, selectArticleById, selectArticles, selectCommentsByArticle, insertComment, modifyArticle} = require("../models/models")
 const fs = require("fs/promises")
 
 
@@ -50,6 +50,16 @@ exports.addComment = (req, res, next) => {
   return insertComment(article_id, username, body)
     .then((comment) => {
       res.status(201).send({ comment })
+    })
+    .catch(next)
+}
+
+exports.updateArticle = (req, res, next) => {
+  const { inc_votes } = req.body
+  const article_id = req.params.article_id
+  return modifyArticle(inc_votes, article_id)
+    .then((article) => {
+      res.status(200).send({ article })
     })
     .catch(next)
 }
