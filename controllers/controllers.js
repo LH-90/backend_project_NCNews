@@ -1,4 +1,5 @@
-const {selectTopics, selectArticleById, selectArticles, selectCommentsByArticle} = require("../models/models")
+const { log } = require("console")
+const {selectTopics, selectArticleById, selectArticles, selectCommentsByArticle, insertComment} = require("../models/models")
 const fs = require("fs/promises")
 
 
@@ -36,12 +37,19 @@ exports.getArticles = (req, res) => {
 
 exports.getCommentsByArticle = (req, res, next) => {
     const article_id = req.params.article_id
-    selectArticleById(article_id)
-    .then(() => {
-      return selectCommentsByArticle(article_id)
-    })
-    .then((comments) => {
-        res.status(200).send({ comments })
+    Promise.all([selectArticleById(article_id), selectCommentsByArticle(article_id)])
+    .then(([article,comments]) => {
+        res.status(200).send({ article, comments })
     }) 
+    .catch(next)
+}
+
+exports.addComment = (req, res, next) => {
+  const { username, body } = req.body
+  const article_id = req.params.article_id
+  return insertComment(article_id, username, body)
+    .then((comment) => {
+      res.status(201).send({ comment })
+    })
     .catch(next)
 }
