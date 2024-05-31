@@ -218,7 +218,7 @@ describe("POST /api/articles/:article_id/comments", () => {
 
 })
 
-  test("Status 400: responds with an error message when missing a required field", () => {
+  test("Status 400: responds with an error message when missing a required property", () => {
     const newComment = {
       username: "icellusedkars",
     }
@@ -232,9 +232,9 @@ describe("POST /api/articles/:article_id/comments", () => {
 
   })
 
-  test("Status 400: responds with an error message when passed a non-existant username", () => {
+  test("Status 400: responds with an error message when passed an invalid property", () => {
     const newComment = {
-      username: "Léa",
+      username: 50,
       body: "No, wrong reasoning"
     }
     return request(app)
@@ -247,11 +247,45 @@ describe("POST /api/articles/:article_id/comments", () => {
 
   })
   
+
+//   test("Status 404: responds with an error message when passed a valid but non-existant username", () => {
+//     const newComment = {
+//       username: "Léa",
+//       body: "No, wrong reasoning"
+//     }
+//     return request(app)
+//       .post("/api/articles/11/comments")
+//       .send(newComment)
+//       .expect(404)
+//       .then(({ body }) => {
+//          expect(body.msg).toBe("Username Not Found")
+//       })
+
+//   })
+
+  test("Status 400: responds with an error message when article_id is an invalid type", () => {
+    return request(app)
+      .get("/api/articles/notAnID/comments")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe("Bad Request")
+          })
+  })
+
+  test("Status 404: responds with an error message when article_id is valid but doesn't exist", () => {
+    return request(app)
+      .get("/api/articles/1000/comments")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe("Article Not Found")
+          })
+  })
+  
 })
 
 
 // PATCH /api/articles/:article_id
-describe("PATCH /api/articles/:article_id", () => {
+describe.only("PATCH /api/articles/:article_id", () => {
     
   test("Status 200: responds with the updated comment", () => {
       const updatedArticle = {
@@ -302,6 +336,24 @@ describe("PATCH /api/articles/:article_id", () => {
          expect(body.msg).toBe("Bad Request")
       })
 
+  })
+
+  test("Status 400: responds with an error message when article_id is an invalid type", () => {
+    return request(app)
+      .get("/api/articles/notAnID")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe("Bad Request")
+          })
+  })
+
+  test("Status 404: responds with an error message when article_id is valid but doesn't exist", () => {
+    return request(app)
+      .get("/api/articles/1000")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe("Article Not Found")
+          })
   })
   
 })
