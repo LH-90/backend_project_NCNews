@@ -99,7 +99,7 @@ describe("GET /api/articles/:article_id", () => {
         .get("/api/articles/1000")
             .expect(404)
             .then(({ body }) => {
-              expect(body.msg).toBe("Not Found")
+              expect(body.msg).toBe("Article Not Found")
             })
   })
 
@@ -175,7 +175,7 @@ describe("GET /api/articles/:article_id/comments", () => {
         .get("/api/articles/1000/comments")
             .expect(404)
             .then(({ body }) => {
-              expect(body.msg).toBe("Not Found")
+              expect(body.msg).toBe("Article Not Found")
             })
   })
 
@@ -304,4 +304,36 @@ describe("PATCH /api/articles/:article_id", () => {
 
   })
   
+})
+
+
+// DELETE /api/comments/:comment_id
+describe("DELETE /api/comments/:comment_id", () => {
+    
+  test("Status 204", () => {
+      return request(app)
+        .delete("/api/comments/5")
+        .expect(204)
+  })
+
+
+  test("Status 400: responds with an error message when comment_id is an invalid type", () => {
+    return request(app)
+        .delete("/api/comments/notAnId")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Bad Request")
+        })
+  })
+  
+
+  test("Status 404: responds with an error message when comment_id is valid but doesn't exist", () => {
+    return request(app)
+        .delete("/api/comments/1000")
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Comment Not Found")
+            })
+  })
+
 })
