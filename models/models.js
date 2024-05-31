@@ -29,25 +29,21 @@ exports.selectArticles = (topic) => {
          .then((result) => {
              return result.rows
          }) 
-
-   } else {
-      
-      let queryStr = "SELECT * FROM articles"
-      const topics = ["mitch", "cats", "paper"]
-
-      let queryValues = []
+   } 
    
-      if (topics.includes(topic)){
-        queryStr += " WHERE topic = $1"
-        queryValues.push(topic)
-      }
-   
-      queryStr += ";"
+   else {
+      return db.query('SELECT slug FROM topics;')
+      .then((result) => {
+         const topics = result.rows.map((topic) => topic.slug)
 
-      return db.query(queryStr, queryValues)
-         .then((result) => {
+         if (!topics.includes(topic)) {
+           return Promise.reject({ status: 404, msg: "Non existing topic" })    
+         }
+         return db.query("SELECT * FROM articles WHERE topic = $1;", [topic])
+            .then((result) => {
             return result.rows
-      }) 
+            })
+      })
    }
 }
 
@@ -93,14 +89,4 @@ exports.selectUsers = () => {
       .then((result) => {
          return result.rows
       })
-}
-
-exports.selectFilteredByTopicArticles = (topic) => {
-   if (!topic) {
-      return this.selectArticles(
-      )
-   }
-
-   
-   
 }

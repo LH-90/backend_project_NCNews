@@ -424,7 +424,6 @@ describe("GET /api/users", () => {
 })
 
 
-
 // GET /api/articles (topic query)
 describe("GET /api/articles", () => {
     
@@ -441,32 +440,23 @@ describe("GET /api/articles", () => {
         })
   })
 
-  test("Status 200: responds with an array of all the articles sorted by date in descending order when a topic is omitted", () => {
+  test("Status 404: responds with an error message when a topic is given but doesn't exist", () => {
     return request(app)
-      .get("/api/articles?topic=")
-      .expect(200)
-      .then(({ body }) => {
-        const articles = body.articles
-        expect(articles).toHaveLength(13)
-        articles.forEach((article) => {
-            expect(article).toEqual(
-              expect.objectContaining({
-                author: expect.any(String),
-                title: expect.any(String),
-                article_id: expect.any(Number),
-                topic: expect.any(String),
-                created_at: expect.any(String),
-                votes: expect.any(Number),
-                article_img_url: expect.any(String),
-                comment_count: expect.any(Number),
-                })
-            )
-        })
-        expect(articles).toBeSortedBy("created_at", { descending: true })
-      })
+      .get("/api/articles?topic=music")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe("Non existing topic")
+          })
+  })
+
+  test("Status 200: responds with an empty array when a topic exists but has no associated articles", () => {
+    return request(app)
+      .get("/api/articles?topic=paper")
+          .expect(200)
+          .then(({ body }) => {
+          const articles = body.articles
+          expect(articles).toEqual([])
+          })
+  })  
+
 })
-
-
-
-
-})  
