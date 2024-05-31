@@ -29,10 +29,11 @@ exports.getArticleById = (req, res, next) => {
 }
 
 exports.getArticles = (req, res) => {
-    return selectArticles()
+    const {topic} = req.query
+    return selectArticles(topic)
       .then((articles) => {
         res.status(200).send({ articles })
-      }) 
+      })
 }
 
 exports.getCommentsByArticle = (req, res, next) => {
@@ -81,3 +82,4 @@ exports.getUsers = (req, res) => {
       res.status(200).send({ users })
     }) 
 }
+

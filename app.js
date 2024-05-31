@@ -22,8 +22,9 @@ app.delete("/api/comments/:comment_id", deleteComment)
 app.get("/api/users", getUsers)
 
 
+
 app.all("*", (req, res) => {
-    res.status(404).send({ msg: "Route Non Found" })
+    res.status(404).send({ msg: "Route Not Found" })
 })
 
 
