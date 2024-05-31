@@ -1,5 +1,5 @@
 const { log } = require("console")
-const {selectTopics, selectArticleById, selectArticles, selectCommentsByArticle, insertComment, modifyArticle, removeComment} = require("../models/models")
+const {selectTopics, selectArticleById, selectArticles, selectCommentsByArticle, insertComment, modifyArticle, removeComment, selectUsers} = require("../models/models")
 const fs = require("fs/promises")
 
 
@@ -72,4 +72,12 @@ exports.deleteComment = (req, res, next) => {
     res.sendStatus(204)
   })
   .catch(next)
+}
+
+
+exports.getUsers = (req, res) => {
+  return selectUsers()
+    .then((users) => {
+      res.status(200).send({ users })
+    }) 
 }
