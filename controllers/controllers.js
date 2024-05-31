@@ -28,12 +28,13 @@ exports.getArticleById = (req, res, next) => {
 
 }
 
-exports.getArticles = (req, res) => {
+exports.getArticles = (req, res, next) => {
     const {topic} = req.query
     return selectArticles(topic)
       .then((articles) => {
         res.status(200).send({ articles })
       })
+      .catch(next)
 }
 
 exports.getCommentsByArticle = (req, res, next) => {
