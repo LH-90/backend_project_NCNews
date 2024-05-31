@@ -285,7 +285,7 @@ describe("POST /api/articles/:article_id/comments", () => {
 
 
 // PATCH /api/articles/:article_id
-describe.only("PATCH /api/articles/:article_id", () => {
+describe("PATCH /api/articles/:article_id", () => {
     
   test("Status 200: responds with the updated comment", () => {
       const updatedArticle = {
