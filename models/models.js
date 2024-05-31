@@ -18,17 +18,37 @@ exports.selectArticleById = (article_id) => {
       })
 }
 
-exports.selectArticles = () => {
-   return db.query(`SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, CAST(COUNT(comments.comment_id) AS INTEGER) AS comment_count 
-   FROM articles
-   LEFT JOIN comments
-   ON articles.article_id = comments.article_id
-   GROUP BY articles.article_id
-   ORDER BY created_at DESC;`)
-      .then((result) => {
-          return result.rows
-      }) 
+exports.selectArticles = (topic) => {
+   if (!topic){
+      return db.query(`SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, CAST(COUNT(comments.comment_id) AS INTEGER) AS comment_count 
+      FROM articles
+      LEFT JOIN comments
+      ON articles.article_id = comments.article_id
+      GROUP BY articles.article_id
+      ORDER BY created_at DESC;`)
+         .then((result) => {
+             return result.rows
+         }) 
 
+   } else {
+      
+      let queryStr = "SELECT * FROM articles"
+      const topics = ["mitch", "cats", "paper"]
+
+      let queryValues = []
+   
+      if (topics.includes(topic)){
+        queryStr += " WHERE topic = $1"
+        queryValues.push(topic)
+      }
+   
+      queryStr += ";"
+
+      return db.query(queryStr, queryValues)
+         .then((result) => {
+            return result.rows
+      }) 
+   }
 }
 
 
@@ -73,4 +93,14 @@ exports.selectUsers = () => {
       .then((result) => {
          return result.rows
       })
+}
+
+exports.selectFilteredByTopicArticles = (topic) => {
+   if (!topic) {
+      return this.selectArticles(
+      )
+   }
+
+   
+   
 }
