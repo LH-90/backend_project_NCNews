@@ -1,45 +1,53 @@
-const express = require("express")
-const app = express()
-const {getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticle, addComment, updateArticle, deleteComment, getUsers} = require("./controllers/controllers")
-app.use(express.json())
+const express = require("express");
+const app = express();
+const {
+  getTopics,
+  getEndpoints,
+  getArticleById,
+  getArticles,
+  getCommentsByArticle,
+  addComment,
+  updateArticle,
+  deleteComment,
+  getUsers,
+} = require("./controllers/controllers");
 
-app.get("/api/topics", getTopics)
+app.use(express.json());
 
-app.get("/api", getEndpoints)
+app.get("/api/topics", getTopics);
 
-app.get("/api/articles/:article_id", getArticleById)
+app.get("/api", getEndpoints);
 
-app.get("/api/articles", getArticles)
+app.get("/api/articles/:article_id", getArticleById);
 
-app.get("/api/articles/:article_id/comments", getCommentsByArticle)
+app.get("/api/articles", getArticles);
 
-app.post("/api/articles/:article_id/comments", addComment)
+app.get("/api/articles/:article_id/comments", getCommentsByArticle);
 
-app.patch("/api/articles/:article_id", updateArticle)
+app.post("/api/articles/:article_id/comments", addComment);
 
-app.delete("/api/comments/:comment_id", deleteComment)
+app.patch("/api/articles/:article_id", updateArticle);
 
-app.get("/api/users", getUsers)
+app.delete("/api/comments/:comment_id", deleteComment);
+
+app.get("/api/users", getUsers);
 
 app.all("*", (req, res) => {
-    res.status(404).send({ msg: "Route Not Found" })
-})
-
+  res.status(404).send({ msg: "Route Not Found" });
+});
 
 app.use((err, req, res, next) => {
   if (err.code === "22P02" || err.code === "23502" || err.code === "23503") {
-      return res.status(400).send({ msg: "Bad Request" })
+    return res.status(400).send({ msg: "Bad Request" });
   } else {
-    next(err)
+    next(err);
   }
-})
+});
 
 app.use((err, req, res, next) => {
   if (err.status && err.msg) {
-    res.status(err.status).send({ msg: err.msg })
+    res.status(err.status).send({ msg: err.msg });
   }
-})
+});
 
-
-
-module.exports = app
+module.exports = app;
