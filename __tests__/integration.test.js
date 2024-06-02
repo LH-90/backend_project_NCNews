@@ -121,7 +121,7 @@ describe("GET /api/articles/:article_id", () => {
 })
 
 
-// GET /api/articles
+// GET /api/articles (topic query)
 describe("GET /api/articles", () => {
     
   test("Status 200: responds with an array of all the articles sorted by date in descending order", () => {
@@ -147,7 +147,40 @@ describe("GET /api/articles", () => {
           })
           expect(articles).toBeSortedBy("created_at", { descending: true })
         })
-  })  
+  }) 
+  
+  test("Status 200: responds with an array of articles filtered by topic", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body }) => {
+        const articles = body.articles
+        expect(articles).toHaveLength(12)
+        articles.forEach((article) => {
+            expect(article.topic).toBe("mitch")
+        })
+      })
+  })
+
+  test("Status 404: responds with an error message when a topic is given but doesn't exist", () => {
+    return request(app)
+      .get("/api/articles?topic=music")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Non existing topic")
+        })
+  })
+
+  test("Status 200: responds with an empty array when a topic exists but has no associated articles", () => {
+    return request(app)
+      .get("/api/articles?topic=paper")
+        .expect(200)
+        .then(({ body }) => {
+        const articles = body.articles
+        expect(articles).toEqual([])
+        })
+  })
+
 })
 
 // GET /api/articles/:article_id/comments
@@ -227,11 +260,27 @@ describe("POST /api/articles/:article_id/comments", () => {
                   author: 'icellusedkars',
                   votes: 0,
                   created_at: expect.any(String)
-                })
-    
+                }) 
+        })
   })
 
-})
+  test("Status 400: responds with an error message when article_id is an invalid type", () => {
+    return request(app)
+      .get("/api/articles/notAnID/comments")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe("Bad Request")
+          })
+  })
+
+  test("Status 404: responds with an error message when article_id is valid but doesn't exist", () => {
+    return request(app)
+      .get("/api/articles/1000/comments")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe("Article Not Found")
+          })
+  })
 
   test("Status 400: responds with an error message when missing a required property", () => {
     const newComment = {
@@ -263,38 +312,21 @@ describe("POST /api/articles/:article_id/comments", () => {
   })
   
 
-//   test("Status 404: responds with an error message when passed a valid but non-existant username", () => {
-//     const newComment = {
-//       username: "Léa",
-//       body: "No, wrong reasoning"
-//     }
-//     return request(app)
-//       .post("/api/articles/11/comments")
-//       .send(newComment)
-//       .expect(404)
-//       .then(({ body }) => {
-//          expect(body.msg).toBe("Username Not Found")
-//       })
-
-//   })
-
-  test("Status 400: responds with an error message when article_id is an invalid type", () => {
+  test("Status 400: responds with an error message due to a foreign key constraint violation  when passed a valid but non-existant username", () => {
+    const newComment = {
+      username: "Léa",
+      body: "No, wrong reasoning"
+    }
     return request(app)
-      .get("/api/articles/notAnID/comments")
-          .expect(400)
-          .then(({ body }) => {
-            expect(body.msg).toBe("Bad Request")
-          })
+      .post("/api/articles/11/comments")
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+         expect(body.msg).toBe("Bad Request")
+      })
+
   })
 
-  test("Status 404: responds with an error message when article_id is valid but doesn't exist", () => {
-    return request(app)
-      .get("/api/articles/1000/comments")
-          .expect(404)
-          .then(({ body }) => {
-            expect(body.msg).toBe("Article Not Found")
-          })
-  })
   
 })
 
@@ -434,44 +466,6 @@ describe("GET /api/users", () => {
       .then(({ body }) => {
         expect(body.msg).toBe("Route Not Found")
         })
-})
-
-})
-
-
-// GET /api/articles (topic query)
-describe("GET /api/articles", () => {
-    
-  test("Status 200: responds with an array of articles filtered by topic", () => {
-      return request(app)
-        .get("/api/articles?topic=mitch")
-        .expect(200)
-        .then(({ body }) => {
-          const articles = body.articles
-          expect(articles).toHaveLength(12)
-          articles.forEach((article) => {
-              expect(article.topic).toBe("mitch")
-          })
-        })
   })
-
-  test("Status 404: responds with an error message when a topic is given but doesn't exist", () => {
-    return request(app)
-      .get("/api/articles?topic=music")
-          .expect(404)
-          .then(({ body }) => {
-            expect(body.msg).toBe("Non existing topic")
-          })
-  })
-
-  test("Status 200: responds with an empty array when a topic exists but has no associated articles", () => {
-    return request(app)
-      .get("/api/articles?topic=paper")
-          .expect(200)
-          .then(({ body }) => {
-          const articles = body.articles
-          expect(articles).toEqual([])
-          })
-  })  
 
 })
