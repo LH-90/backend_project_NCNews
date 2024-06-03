@@ -149,15 +149,16 @@ describe("GET /api/articles", () => {
         articles.forEach((article) => {
           expect(article.topic).toBe("mitch");
         });
+        expect(articles).toBeSortedBy("created_at", { descending: true });
       });
   });
 
-  test("Status 404: responds with an appropriate error message when a topic is given but doesn't exist", () => {
+  test("Status 404: responds with an appropriate error message when passed a non existing topic", () => {
     return request(app)
       .get("/api/articles?topic=music")
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Non existing topic");
+        expect(body.msg).toBe("Non Existing Topic");
       });
   });
 
@@ -168,6 +169,68 @@ describe("GET /api/articles", () => {
       .then(({ body }) => {
         const articles = body.articles;
         expect(articles).toEqual([]);
+      });
+  });
+
+  test("Status 200: responds with an array of articles sorted by title in descending order", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title")
+      .expect(200)
+      .then(({ body }) => {
+        const articles = body.articles;
+        expect(articles).toBeSortedBy("title", { descending: true });
+      });
+  });
+
+  test("Status 400: responds with an appropriate error message when passed an invalid sort_by value", () => {
+    return request(app)
+      .get("/api/articles?sort_by=movie")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid sort_by value");
+      });
+  });
+
+  test("Status 200: responds with an array of articles ordered by ascending order", () => {
+    return request(app)
+      .get("/api/articles?order=ASC")
+      .expect(200)
+      .then(({ body }) => {
+        const articles = body.articles;
+        expect(articles).toBeSortedBy("created_at");
+      });
+  });
+
+  test("Status 200: responds with an array of articles ordered by descending order", () => {
+    return request(app)
+      .get("/api/articles?order=DESC")
+      .expect(200)
+      .then(({ body }) => {
+        const articles = body.articles;
+        expect(articles).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+
+  test("Status 400: responds with an appropriate error message when passed an invalid order value", () => {
+    return request(app)
+      .get("/api/articles?order=restaurant")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid order value");
+      });
+  });
+
+  test("Status 200: responds with an array of articles filtered by topic and sorted by title in ascending order", () => {
+    return request(app)
+      .get("/api/articles?topic=cats&sort_by=title&order=ASC")
+      .expect(200)
+      .then(({ body }) => {
+        const articles = body.articles;
+        expect(articles).toHaveLength(1);
+        articles.forEach((article) => {
+          expect(article.topic).toBe("cats");
+        });
+        expect(articles).toBeSortedBy("title");
       });
   });
 });
@@ -423,4 +486,32 @@ describe("GET /api/users", () => {
         });
       });
   });
+});
+
+// GET /api/users/:username
+describe("GET /api/users/:username", () => {
+  test("Status 200: responds with an individual object containing the user properties", () => {
+    return request(app)
+      .get("/api/users/butter_bridge")
+      .expect(200)
+      .then(({ body }) => {
+        const user = body.user
+        expect(user).toMatchObject({
+          username: 'butter_bridge',
+          name: 'jonny',
+          avatar_url:
+            'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg'
+        })
+      });
+  });
+
+  test("Status 404: responds with an appropriate error message when username doesn't exist", () => {
+    return request(app)
+      .get("/api/users/Alex")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Non Existing Username");
+      });
+  });
+
 });

@@ -7,6 +7,7 @@ const {
   modifyArticle,
   removeComment,
   selectUsers,
+  selectUserByUsername
 } = require("../models/models");
 const fs = require("fs/promises");
 
@@ -33,8 +34,8 @@ exports.getArticleById = (req, res, next) => {
 };
 
 exports.getArticles = (req, res, next) => {
-  const { topic } = req.query;
-  return selectArticles(topic)
+  const { topic, sort_by, order } = req.query;
+  return selectArticles(topic, sort_by, order)
     .then((articles) => {
       res.status(200).send({ articles });
     })
@@ -83,7 +84,19 @@ exports.deleteComment = (req, res, next) => {
 };
 
 exports.getUsers = (req, res) => {
-  return selectUsers().then((users) => {
+  return selectUsers()
+  .then((users) => {
     res.status(200).send({ users });
   });
 };
+
+
+exports.getUserByUsername = (req, res, next) => {
+  const username = req.params.username
+  return selectUserByUsername(username)
+  .then ((user) => {
+    res.status(200).send({ user })
+  })
+  .catch(next)
+}
+

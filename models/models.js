@@ -33,32 +33,55 @@ exports.selectArticleById = (articleId, commentCount) => {
   }
 };
 
-exports.selectArticles = (topic) => {
+exports.selectArticles = (topic, sort_by = "created_at", order = "DESC") => {
+  const validSortValues = [
+    "article_id",
+    "title",
+    "topic",
+    "author",
+    "body",
+    "created_at",
+    "votes",
+    "article_img_url",
+  ];
+
+  const validOrderValues = ["ASC", "DESC", "asc", "desc"];
+
+  if (!validSortValues.includes(sort_by)) {
+    return Promise.reject({ status: 400, msg: "Invalid sort_by value" });
+  }
+
+  if (!validOrderValues.includes(order)) {
+    return Promise.reject({ status: 400, msg: "Invalid order value" });
+  }
+
+  let queryStr = `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, CAST(COUNT(comments.comment_id) AS INTEGER) AS comment_count 
+  FROM articles
+  LEFT JOIN comments
+  ON articles.article_id = comments.article_id
+  `;
+
   if (!topic) {
-    return db
-      .query(
-        `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, CAST(COUNT(comments.comment_id) AS INTEGER) AS comment_count 
-      FROM articles
-      LEFT JOIN comments
-      ON articles.article_id = comments.article_id
-      GROUP BY articles.article_id
-      ORDER BY created_at DESC;`
-      )
-      .then((result) => {
-        return result.rows;
-      });
+    queryStr += ` GROUP BY articles.article_id
+    ORDER BY ${sort_by} ${order};`;
+
+    return db.query(queryStr).then((result) => {
+      return result.rows;
+    });
   } else {
+    queryStr += ` WHERE topic = $1
+    GROUP BY articles.article_id
+    ORDER BY ${sort_by} ${order};`;
+
     return db.query("SELECT slug FROM topics;").then((result) => {
       const topics = result.rows.map((topic) => topic.slug);
 
       if (!topics.includes(topic)) {
-        return Promise.reject({ status: 404, msg: "Non existing topic" });
+        return Promise.reject({ status: 404, msg: "Non Existing Topic" });
       }
-      return db
-        .query("SELECT * FROM articles WHERE topic = $1;", [topic])
-        .then((result) => {
-          return result.rows;
-        });
+      return db.query(queryStr, [topic]).then((result) => {
+        return result.rows;
+      });
     });
   }
 };
@@ -112,7 +135,20 @@ exports.removeComment = (comment_id) => {
 };
 
 exports.selectUsers = () => {
-  return db.query("SELECT * FROM users;").then((result) => {
+  return db.query("SELECT * FROM users;")
+  .then((result) => {
     return result.rows;
   });
 };
+
+
+exports.selectUserByUsername = (username) => {
+  return db.query(`SELECT * FROM users WHERE username = $1`, [username])
+  .then((result) => {
+    if (result.rows.length === 0) {
+      return Promise.reject({ status: 404, msg: "Non Existing Username" });
+    }
+    return result.rows[0]
+  })
+}
+

@@ -1,36 +1,18 @@
 const express = require("express");
 const app = express();
-const {
-  getTopics,
-  getEndpoints,
-  getArticleById,
-  getArticles,
-  getCommentsByArticle,
-  addComment,
-  updateArticle,
-  deleteComment,
-  getUsers,
-} = require("./controllers/controllers");
+const topicsRouter = require("./routes/topics-router");
+const articlesRouter = require("./routes/articles-router");
+const commentsRouter = require("./routes/comments-router");
+const usersRouter = require("./routes/users-router");
+const endpointsRouter = require("./routes/endpoints-router");
 
 app.use(express.json());
 
-app.get("/api/topics", getTopics);
-
-app.get("/api", getEndpoints);
-
-app.get("/api/articles/:article_id", getArticleById);
-
-app.get("/api/articles", getArticles);
-
-app.get("/api/articles/:article_id/comments", getCommentsByArticle);
-
-app.post("/api/articles/:article_id/comments", addComment);
-
-app.patch("/api/articles/:article_id", updateArticle);
-
-app.delete("/api/comments/:comment_id", deleteComment);
-
-app.get("/api/users", getUsers);
+app.use("/api/topics", topicsRouter);
+app.use("/api", endpointsRouter);
+app.use("/api/articles", articlesRouter);
+app.use("/api/comments", commentsRouter);
+app.use("/api/users", usersRouter);
 
 app.all("*", (req, res) => {
   res.status(404).send({ msg: "Route Not Found" });

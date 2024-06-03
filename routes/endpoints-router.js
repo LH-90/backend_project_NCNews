@@ -1,0 +1,7 @@
+const express = require("express");
+const { getEndpoints } = require("../controllers/controllers");
+const endpointsRouter = express.Router();
+
+endpointsRouter.get("/", getEndpoints);
+
+module.exports = endpointsRouter;
