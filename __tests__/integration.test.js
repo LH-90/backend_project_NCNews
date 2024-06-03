@@ -315,7 +315,7 @@ describe("POST /api/articles/:article_id/comments", () => {
 
   test("Status 400: responds with an appropriate error message when article_id is an invalid type", () => {
     return request(app)
-      .get("/api/articles/notAnID/comments")
+      .post("/api/articles/notAnID/comments")
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad Request");
@@ -324,7 +324,7 @@ describe("POST /api/articles/:article_id/comments", () => {
 
   test("Status 404: responds with an appropriate error message when article_id is valid but doesn't exist", () => {
     return request(app)
-      .get("/api/articles/1000/comments")
+      .post("/api/articles/1000/comments")
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Article Not Found");
@@ -424,7 +424,7 @@ describe("PATCH /api/articles/:article_id", () => {
 
   test("Status 400: responds with an appropriate error message when article_id is an invalid type", () => {
     return request(app)
-      .get("/api/articles/notAnID")
+      .patch("/api/articles/notAnID")
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad Request");
@@ -433,7 +433,7 @@ describe("PATCH /api/articles/:article_id", () => {
 
   test("Status 404: responds with an appropriate error message when article_id is valid but doesn't exist", () => {
     return request(app)
-      .get("/api/articles/1000")
+      .patch("/api/articles/1000")
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Article Not Found");
@@ -495,13 +495,13 @@ describe("GET /api/users/:username", () => {
       .get("/api/users/butter_bridge")
       .expect(200)
       .then(({ body }) => {
-        const user = body.user
+        const user = body.user;
         expect(user).toMatchObject({
-          username: 'butter_bridge',
-          name: 'jonny',
+          username: "butter_bridge",
+          name: "jonny",
           avatar_url:
-            'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg'
-        })
+            "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg",
+        });
       });
   });
 
@@ -513,5 +513,69 @@ describe("GET /api/users/:username", () => {
         expect(body.msg).toBe("Non Existing Username");
       });
   });
+});
 
+// PATCH /api/comments/:comment_id
+describe("PATCH api/comments/:comment_id", () => {
+  test("Status 200: responds with the updated comment", () => {
+    const updatedComment = {
+      inc_votes: 20,
+    };
+    return request(app)
+      .patch("/api/comments/9")
+      .send(updatedComment)
+      .expect(200)
+      .then(({ body }) => {
+        const comment = body.comment;
+        expect(comment).toMatchObject({
+          body: "Superficially charming",
+          votes: 20,
+          author: "icellusedkars",
+          article_id: 1,
+          created_at: "2020-01-01T03:08:00.000Z",
+        });
+      });
+  });
+
+  test("Status 400: responds with an appropriate error message when missing a required field", () => {
+    const updatedComment = {};
+    return request(app)
+      .patch("/api/comments/9")
+      .send(updatedComment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+
+  test("Status 400: responds with an appropriate error message when passed an invalid type", () => {
+    const updatedArticle = {
+      inc_votes: "actor",
+    };
+    return request(app)
+      .patch("/api/comments/9")
+      .send(updatedArticle)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+
+  test("Status 400: responds with an appropriate error message when comment_id is an invalid type", () => {
+    return request(app)
+      .patch("/api/comments/notAnID")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+
+  test("Status 404: responds with an appropriate error message when comment_id is valid but doesn't exist", () => {
+    return request(app)
+      .patch("/api/comments/1000")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Comment Not Found");
+      });
+  });
 });

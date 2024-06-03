@@ -7,7 +7,8 @@ const {
   modifyArticle,
   removeComment,
   selectUsers,
-  selectUserByUsername
+  selectUserByUsername,
+  modifyComment,
 } = require("../models/models");
 const fs = require("fs/promises");
 
@@ -57,8 +58,11 @@ exports.getCommentsByArticle = (req, res, next) => {
 exports.addComment = (req, res, next) => {
   const { username, body } = req.body;
   const article_id = req.params.article_id;
-  return insertComment(article_id, username, body)
-    .then((comment) => {
+  Promise.all([
+    selectArticleById(article_id),
+    insertComment(article_id, username, body),
+  ])
+    .then(([article, comment]) => {
       res.status(201).send({ comment });
     })
     .catch(next);
@@ -84,19 +88,26 @@ exports.deleteComment = (req, res, next) => {
 };
 
 exports.getUsers = (req, res) => {
-  return selectUsers()
-  .then((users) => {
+  return selectUsers().then((users) => {
     res.status(200).send({ users });
   });
 };
 
-
 exports.getUserByUsername = (req, res, next) => {
-  const username = req.params.username
+  const username = req.params.username;
   return selectUserByUsername(username)
-  .then ((user) => {
-    res.status(200).send({ user })
-  })
-  .catch(next)
-}
+    .then((user) => {
+      res.status(200).send({ user });
+    })
+    .catch(next);
+};
 
+exports.updateComment = (req, res, next) => {
+  const { inc_votes } = req.body;
+  const comment_id = req.params.comment_id;
+  return modifyComment(inc_votes, comment_id)
+    .then((comment) => {
+      res.status(200).send({ comment });
+    })
+    .catch(next);
+};
