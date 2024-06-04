@@ -9,6 +9,7 @@ const {
   selectUsers,
   selectUserByUsername,
   modifyComment,
+  insertArticle,
 } = require("../models/models");
 const fs = require("fs/promises");
 
@@ -108,6 +109,27 @@ exports.updateComment = (req, res, next) => {
   return modifyComment(inc_votes, comment_id)
     .then((comment) => {
       res.status(200).send({ comment });
+    })
+    .catch(next);
+};
+
+exports.addArticle = (req, res, next) => {
+  const { author, title, body, topic } = req.body;
+  return insertArticle(author, title, body, topic)
+    .then((article) => {
+      const Addedarticle = {
+        article_id: article.article_id,
+        title: article.title,
+        topic: article.topic,
+        author: article.author,
+        body: article.body,
+        created_at: article.created_at,
+        votes: article.votes,
+        article_img_url: article.article_img_url,
+        comment_count: 0,
+      };
+      console.log({ Addedarticle });
+      res.status(201).send({ Addedarticle });
     })
     .catch(next);
 };

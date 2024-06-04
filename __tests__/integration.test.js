@@ -579,3 +579,82 @@ describe("PATCH api/comments/:comment_id", () => {
       });
   });
 });
+
+// POST /api/articles
+
+describe("POST /api/articles", () => {
+  test("Status 201: responds with the posted article", () => {
+    const newArticle = {
+      author: "butter_bridge",
+      title: "Hamlet",
+      body: "To be, or not to be, that is the question",
+      topic: "paper",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(201)
+      .then(({ body }) => {
+        const article = body.Addedarticle;
+        expect(article).toMatchObject({
+          article_id: 14,
+          title: "Hamlet",
+          topic: "paper",
+          author: "butter_bridge",
+          body: "To be, or not to be, that is the question",
+          created_at: expect.any(String),
+          votes: 0,
+          article_img_url:
+            "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700",
+          comment_count: 0,
+        });
+      });
+  });
+
+  test("Status 400: responds with an appropriate error message when missing a required property", () => {
+    const newArticle = {
+      author: "butter_bridge",
+      title: "Hamlet",
+      body: "To be, or not to be, that is the question",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+
+  test("Status 400: responds with an appropriate error message when passed an invalid property", () => {
+    const newArticle = {
+      author: true,
+      title: "Hamlet",
+      body: "To be, or not to be, that is the question",
+      topic: "paper",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+
+  test("Status 400: responds with an appropriate error message when passed a valid but non-existant author (foreign key constraint violation)", () => {
+    const newArticle = {
+      author: "William Shakespeare",
+      title: "Hamlet",
+      body: "To be, or not to be, that is the question",
+      topic: "paper",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+});

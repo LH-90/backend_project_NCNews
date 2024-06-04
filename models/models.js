@@ -167,3 +167,15 @@ exports.modifyComment = (inc_votes, comment_id) => {
       return result.rows[0];
     });
 };
+
+exports.insertArticle = (author, title, body, topic) => {
+  return db
+    .query(
+      `INSERT INTO articles (author, title, body, topic)
+   VALUES ($1, $2, $3, $4) RETURNING *;`,
+      [author, title, body, topic]
+    )
+    .then((result) => {
+      return result.rows[0];
+    });
+};
