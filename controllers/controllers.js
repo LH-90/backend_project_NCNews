@@ -128,7 +128,6 @@ exports.addArticle = (req, res, next) => {
         article_img_url: article.article_img_url,
         comment_count: 0,
       };
-      console.log({ Addedarticle });
       res.status(201).send({ Addedarticle });
     })
     .catch(next);
