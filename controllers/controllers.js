@@ -26,9 +26,9 @@ exports.getEndpoints = (req, res) => {
 };
 
 exports.getArticleById = (req, res, next) => {
-  const articleId = req.params.article_id;
-  const commentCount = req.query.comment_count;
-  return selectArticleById(articleId, commentCount)
+  const {article_id} = req.params;
+  const {comment_count} = req.query;
+  return selectArticleById(article_id, comment_count)
     .then((article) => {
       res.status(200).send({ article });
     })
@@ -45,7 +45,7 @@ exports.getArticles = (req, res, next) => {
 };
 
 exports.getCommentsByArticle = (req, res, next) => {
-  const article_id = req.params.article_id;
+  const {article_id} = req.params;
   Promise.all([
     selectArticleById(article_id),
     selectCommentsByArticle(article_id),
@@ -58,7 +58,7 @@ exports.getCommentsByArticle = (req, res, next) => {
 
 exports.addComment = (req, res, next) => {
   const { username, body } = req.body;
-  const article_id = req.params.article_id;
+  const {article_id} = req.params;
   Promise.all([
     selectArticleById(article_id),
     insertComment(article_id, username, body),
@@ -71,7 +71,7 @@ exports.addComment = (req, res, next) => {
 
 exports.updateArticle = (req, res, next) => {
   const { inc_votes } = req.body;
-  const article_id = req.params.article_id;
+  const {article_id} = req.params;
   return modifyArticle(inc_votes, article_id)
     .then((article) => {
       res.status(200).send({ article });
@@ -80,7 +80,7 @@ exports.updateArticle = (req, res, next) => {
 };
 
 exports.deleteComment = (req, res, next) => {
-  const comment_id = req.params.comment_id;
+  const {comment_id} = req.params;
   return removeComment(comment_id)
     .then(() => {
       res.sendStatus(204);
@@ -95,7 +95,7 @@ exports.getUsers = (req, res) => {
 };
 
 exports.getUserByUsername = (req, res, next) => {
-  const username = req.params.username;
+  const {username} = req.params;
   return selectUserByUsername(username)
     .then((user) => {
       res.status(200).send({ user });
@@ -105,7 +105,7 @@ exports.getUserByUsername = (req, res, next) => {
 
 exports.updateComment = (req, res, next) => {
   const { inc_votes } = req.body;
-  const comment_id = req.params.comment_id;
+  const {comment_id} = req.params;
   return modifyComment(inc_votes, comment_id)
     .then((comment) => {
       res.status(200).send({ comment });
